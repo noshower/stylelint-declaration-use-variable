@@ -1,6 +1,6 @@
 import { testRule } from 'stylelint-test-rule-node';
 
-import * as plugin from '../dist/index.js';
+import * as plugin from '../lib/esm/index.mjs';
 
 const { messages, ruleName } = plugin;
 

@@ -1,16 +1,32 @@
 {
   "name": "@yu-chen/stylelint-declaration-use-variable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A stylelint custom rule to check the use of scss variable on declaration.",
-  "main": "dist/index.js",
-  "type": "module",
+  "types": "./lib/cjs/types/index.d.ts",
+  "main": "./lib/cjs/index.js",
   "files": [
-    "dist"
-  ],
+    "lib/**/*"
+ ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
   "scripts": {
-    "build":"tsc",
+    "clean": "rm -rf ./lib",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
+    "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
+    "prepack": "npm run build",
     "pretest":"npm run build",
-    "test": "node test/index.js"
+    "test": "node test/index.mjs"
   },
   "repository": {
     "type": "git",
@@ -37,7 +53,7 @@
     "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "stylelint": "^16.0.2"
+    "stylelint": "^15.0.2"
   },
   "publishConfig": {
     "access": "public"
