@@ -10,8 +10,6 @@
     "source.fixAll.eslint": "explicit",
     "source.fixAll.stylelint": "explicit"
   },
-  "stylelint.validate": ["css", "less", "postcss", "sass", "scss"],
-  "stylelint.enable": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "git.ignoreLimitWarning": true
 }

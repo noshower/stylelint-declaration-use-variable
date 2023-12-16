@@ -1,8 +1,10 @@
-import stylelint from 'stylelint';
+import stylelint, { Rule } from 'stylelint';
+
+const { utils, createPlugin } = stylelint;
 
 const ruleName = 'yu-chen/declaration-use-variable';
 
-const messages = stylelint.utils.ruleMessages(ruleName, {
+const messages = utils.ruleMessages(ruleName, {
   expected: function expected(property) {
     return 'Expected variable for "' + property + '".';
   },
@@ -16,7 +18,7 @@ const meta = {
 };
 
 // Store the variables in object
-const variables = {};
+const variables: Record<string, string> = {};
 
 /**
  * Returns boolean wether a string should be parsed as regex or not
@@ -24,8 +26,8 @@ const variables = {};
  * @param  {string} string
  * @return {bool}
  */
-function isStringRegex(string) {
-  return string[0] === '/' && string[string.length - 1] === '/';
+function isStringRegex(str: string) {
+  return str[0] === '/' && str[str.length - 1] === '/';
 }
 
 /**
@@ -34,8 +36,8 @@ function isStringRegex(string) {
  * @param  {string} string
  * @return {RegExp}
  */
-function toRegex(string) {
-  return new RegExp(string.slice(1, -1));
+function toRegex(str: string) {
+  return new RegExp(str.slice(1, -1));
 }
 
 /**
@@ -45,7 +47,7 @@ function toRegex(string) {
  * @param  {string} val
  * @return {bool}
  */
-function checkValue(val, exceptions = []) {
+function checkValue(val: string, exceptions: string[] = []) {
   // Regex for checking
   // scss variable starting with '$'
   // map-get function in scss
@@ -64,6 +66,26 @@ function checkValue(val, exceptions = []) {
   return regEx.test(val);
 }
 
+function validProperties(actual: any) {
+  if (typeof actual === 'string') {
+    return true;
+  }
+  if (Array.isArray(actual)) {
+    if (
+      actual.every((item, i) => {
+        // 数组的最后一个可以是对象，其他必须是字符串
+        if (i === actual.length - 1 && typeof item === 'object') {
+          return true;
+        }
+        return typeof item === 'string';
+      })
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Checks the value and if its present in variables object
  * returns the respective variable
@@ -71,7 +93,7 @@ function checkValue(val, exceptions = []) {
  * @param  {string}
  * @return {string|bool}
  */
-function checkPresentVariable(val) {
+function checkPresentVariable(val: string) {
   return variables[val] ? variables[val] : false;
 }
 
@@ -83,7 +105,7 @@ function checkPresentVariable(val) {
  * @param  {string|regex} comparison
  * @return {bool}
  */
-function testAgaintString(prop, value, comparison) {
+function testAgaintString(prop: string, value: string, comparison: string) {
   // if prop is a variable do not run check
   // and add it in the variables object for later check
   // and return, since it would be a variable declaration
@@ -108,7 +130,7 @@ function testAgaintString(prop, value, comparison) {
  * @param  {string|array} comparison
  * @return {bool}
  */
-function checkProp(prop, value, targets) {
+function checkProp(prop: string, value: string, targets: string[]) {
   for (var target of targets) {
     if (testAgaintString(prop, value, target)) return true;
   }
@@ -121,8 +143,11 @@ function checkProp(prop, value, targets) {
  * @param  {string|array} options
  * @return {object}
  */
-function parseOptions(options) {
-  var parsed = { targets: [], ignoreValues: ['/color\\(/'] };
+function parseOptions(options: any) {
+  const parsed: { targets: string[]; ignoreValues: string[] } = {
+    targets: [],
+    ignoreValues: ['/color\\(/'],
+  };
 
   if (Array.isArray(options)) {
     var last = options[options.length - 1];
@@ -140,14 +165,14 @@ function parseOptions(options) {
   return parsed;
 }
 
-const ruleFunction = function (primary, secondaryOptions) {
-  return function (root, result) {
-    var validOptions = stylelint.utils.validateOptions(result, ruleName, {
-      actual: primary,
-      possible: () => true,
+const ruleFunction: Rule = (properties) => {
+  return (root, result) => {
+    var validOptions = utils.validateOptions(result, ruleName, {
+      actual: properties,
+      possible: validProperties,
     });
 
-    const options = parseOptions(primary || []);
+    const options = parseOptions(properties || []);
 
     if (!validOptions) {
       return;
@@ -159,7 +184,7 @@ const ruleFunction = function (primary, secondaryOptions) {
         checkPresentVariable(statement.value) &&
         !checkValue(statement.value, options.ignoreValues)
       ) {
-        stylelint.utils.report({
+        utils.report({
           result: result,
           ruleName: ruleName,
           node: statement,
@@ -172,7 +197,7 @@ const ruleFunction = function (primary, secondaryOptions) {
         checkProp(statement.prop, statement.value, options.targets) &&
         !checkValue(statement.value, options.ignoreValues)
       ) {
-        stylelint.utils.report({
+        utils.report({
           ruleName: ruleName,
           result: result,
           node: statement,
@@ -187,4 +212,7 @@ ruleFunction.ruleName = ruleName;
 ruleFunction.messages = messages;
 ruleFunction.meta = meta;
 
-export default stylelint.createPlugin(ruleName, ruleFunction);
+const declarationStrictValuePlugin = createPlugin(ruleName, ruleFunction);
+
+export default declarationStrictValuePlugin;
+export { ruleName, messages };

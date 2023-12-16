@@ -1,10 +1,8 @@
 import { testRule } from 'stylelint-test-rule-node';
 
-import plugin from '../index.js';
+import * as plugin from '../dist/index.js';
 
-const {
-  rule: { messages, ruleName },
-} = plugin;
+const { messages, ruleName } = plugin;
 
 // Test for excluding non-matching properties
 testRule({

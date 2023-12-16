@@ -1,11 +1,16 @@
 {
   "name": "@yu-chen/stylelint-declaration-use-variable",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A stylelint custom rule to check the use of scss variable on declaration.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "node ./test/index.js"
+    "build":"tsc",
+    "pretest":"npm run build",
+    "test": "node test/index.js"
   },
   "repository": {
     "type": "git",
@@ -27,14 +32,17 @@
   },
   "homepage": "https://github.com/noshower/stylelint-declaration-use-variable#readme",
   "devDependencies": {
-    "@darcytech/eslint-config-base-darcytech": "^5.0.2",
-    "prettier": "^3.1.1",
-    "stylelint": "^16.0.2"
+    "stylelint": "^16.0.2",
+    "stylelint-test-rule-node": "^0.2.1",
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "stylelint": "^16.0.2"
   },
-  "dependencies": {
-    "stylelint-test-rule-node": "^0.2.1"
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.12.0"
   }
 }

@@ -1,4 +1,8 @@
 {
   "root": true,
-  "extends": ["@darcytech/base-darcytech"]
+  "extends": ["@darcytech/base-darcytech"],
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": "./"
+  }
 }
