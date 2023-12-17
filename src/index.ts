@@ -6,10 +6,10 @@ const ruleName = 'yu-chen/declaration-use-variable';
 
 const messages = utils.ruleMessages(ruleName, {
   expected: function expected(property) {
-    return 'Expected variable for "' + property + '".';
+    return `Expected variable for "${property}".`;
   },
   expectedPresent: function expectedPresent(property, variable) {
-    return 'Expected variable ' + variable + ' for "' + property + '".';
+    return `Expected variable ${variable} for "${property}".`;
   },
 });
 
@@ -53,20 +53,18 @@ function checkValue(val: string, exceptions: string[] = []) {
   // map-get function in scss
   // less variable starting with '@'
   // custom properties starting with '--' or 'var'
-  var regEx = /^(\$)|(map-get)|(\@)|(--)|(var)/g;
+  const regEx = /^(\$)|(map-get)|(@)|(--)|(var)/g;
 
-  for (var exception of exceptions) {
+  for (const exception of exceptions) {
     if (isStringRegex(exception)) {
       if (toRegex(exception).test(val)) return true;
-    } else {
-      if (exception === val) return true;
-    }
+    } else if (exception === val) return true;
   }
 
   return regEx.test(val);
 }
 
-function validProperties(actual: any) {
+function validProperties(actual: unknown) {
   if (typeof actual === 'string') {
     return true;
   }
@@ -112,15 +110,15 @@ function testAgaintString(prop: string, value: string, comparison: string) {
   // not a style property declaration
   if (checkValue(prop)) {
     variables[value] = prop;
-    return;
+    return false;
   }
 
   if (isStringRegex(comparison)) {
-    var valueMatches = new RegExp(comparison.slice(1, -1)).test(prop);
+    const valueMatches = new RegExp(comparison.slice(1, -1)).test(prop);
     return valueMatches;
   }
 
-  return prop == comparison;
+  return prop === comparison;
 }
 
 /**
@@ -131,7 +129,7 @@ function testAgaintString(prop: string, value: string, comparison: string) {
  * @return {bool}
  */
 function checkProp(prop: string, value: string, targets: string[]) {
-  for (var target of targets) {
+  for (const target of targets) {
     if (testAgaintString(prop, value, target)) return true;
   }
   return false;
@@ -143,6 +141,7 @@ function checkProp(prop: string, value: string, targets: string[]) {
  * @param  {string|array} options
  * @return {object}
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseOptions(options: any) {
   const parsed: { targets: string[]; ignoreValues: string[] } = {
     targets: [],
@@ -150,7 +149,7 @@ function parseOptions(options: any) {
   };
 
   if (Array.isArray(options)) {
-    var last = options[options.length - 1];
+    const last = options[options.length - 1];
     if (typeof last === 'object') {
       parsed.targets = options.slice(0, options.length - 1);
       if (last.ignoreValues) {
@@ -167,7 +166,7 @@ function parseOptions(options: any) {
 
 const ruleFunction: Rule = (properties) => {
   return (root, result) => {
-    var validOptions = utils.validateOptions(result, ruleName, {
+    const validOptions = utils.validateOptions(result, ruleName, {
       actual: properties,
       possible: validProperties,
     });
@@ -178,19 +177,19 @@ const ruleFunction: Rule = (properties) => {
       return;
     }
 
-    root.walkDecls(function (statement) {
+    root.walkDecls((statement) => {
       if (
         checkProp(statement.prop, statement.value, options.targets) &&
         checkPresentVariable(statement.value) &&
         !checkValue(statement.value, options.ignoreValues)
       ) {
         utils.report({
-          result: result,
-          ruleName: ruleName,
+          result,
+          ruleName,
           node: statement,
           message: messages.expectedPresent(
             statement.prop,
-            checkPresentVariable(statement.value)
+            checkPresentVariable(statement.value),
           ),
         });
       } else if (
@@ -198,8 +197,8 @@ const ruleFunction: Rule = (properties) => {
         !checkValue(statement.value, options.ignoreValues)
       ) {
         utils.report({
-          ruleName: ruleName,
-          result: result,
+          ruleName,
+          result,
           node: statement,
           message: messages.expected(statement.prop),
         });

@@ -5,6 +5,7 @@
     "enable": true
   },
   "eslint.nodePath": "./node_modules",
+  "prettier.prettierPath": "./node_modules/prettier/index.cjs",
   "files.autoSave": "onFocusChange",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
